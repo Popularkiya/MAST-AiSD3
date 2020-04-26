@@ -1,0 +1,6 @@
+﻿  Isomorphate.cpp
+  Tree.cpp
+  main.cpp
+  Generowanie kodu...
+C:\Users\kinga\source\repos\MAST\Isomorphate.cpp(174): warning C4715: "Isomorphate::Connect”: niewszystkie ścieżki kodu zwracają wartość
+  MAST.vcxproj -> C:\Users\kinga\source\repos\MAST\Debug\MAST.exe
