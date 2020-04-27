@@ -3,8 +3,8 @@
 
 
 Isomorphate::Isomorphate(Tree* First, Tree* Second) {
-	this->y = First->AmountOfNodes() + NUM_OF_LEAFS;
-	this->x = Second->AmountOfNodes() + NUM_OF_LEAFS;
+	this->y = First->AmountOfNodes() + NUM_OF_LEAFS+1;
+	this->x = Second->AmountOfNodes() + NUM_OF_LEAFS+1;
 	this->isomorphic_array = (int**)malloc(this->y * sizeof(int*));
 	if (this->isomorphic_array != NULL) {
 		for (int i = 0; i < this->y; i++) {
@@ -15,19 +15,25 @@ Isomorphate::Isomorphate(Tree* First, Tree* Second) {
 			else {
 				for (int j = 0; j < this->x; j++) {
 					this->isomorphic_array[i][j] = 0;
-					//leaf with leaf-----------------------------------------------------------------
-					if (i <= 10 && j <= 10 && i == j) {
-						this->isomorphic_array[i][j] = 1;
+
+					if (i == 0 || j == 0) {
+						this->isomorphic_array[i][j] = NULL;
 					}
-					//leaf A with node B-------------------------------------------------------------
-					else if (j >= A && i <= 10) {
-						Leaf* node = Second->ReturnNodesPtr(j);
-						this->isomorphic_array[i][j] = Second->SearchLeaf(node, i);
-					}
-					//node A with leaf A-------------------------------------------------------------
-					else if (i >= A && j <= 10) {
-						Leaf* node = First->ReturnNodesPtr(i);
-						this->isomorphic_array[i][j] = First->SearchLeaf(node, j);
+					else {
+						//leaf with leaf-----------------------------------------------------------------
+						if (i <= 10 && j <= 10 && i == j) {
+							this->isomorphic_array[i][j] = 1;
+						}
+						//leaf A with node B-------------------------------------------------------------
+						else if (j >= A && i <= 10) {
+							Leaf* node = Second->ReturnNodesPtr(j);
+							this->isomorphic_array[i][j] = Second->SearchLeaf(node, i);
+						}
+						//node A with leaf A-------------------------------------------------------------
+						else if (i >= A && j <= 10) {
+							Leaf* node = First->ReturnNodesPtr(i);
+							this->isomorphic_array[i][j] = First->SearchLeaf(node, j);
+						}
 					}
 				}
 			}
@@ -110,26 +116,31 @@ int Isomorphate::BruteForce(Leaf* nodeFirst, Leaf* nodeSecond){
 	int how_many_connection_nums=0;
 	int* connection_tab = NULL;
 	Leaf* node = nullptr;
+	Leaf* connection_node = nullptr;
 	//-----------------------------------------------------------------
 	if (first_children_num > second_children_num) {
 		connection_tab = (int*)malloc(first_children_num * sizeof(int));
 		how_many_connection_nums = first_children_num;
 		rev = true;
+		connection_node = nodeFirst;
 		node = nodeSecond;
 	}
 	else {
 		connection_tab = (int*)malloc(second_children_num * sizeof(int));
 		how_many_connection_nums = second_children_num;
+		connection_node = nodeSecond;
 		node = nodeFirst;
 	}
 	//------------------------------------------------------------------
 	if (connection_tab != NULL) {
-		ptr = node->Child();
+		ptr = connection_node->Child();
 		for (int i = 0; i < how_many_connection_nums; i++) {
 			connection_tab[i] = ptr->Value();
 			ptr = ptr->Brother();
 		}
-		return this->Connect(node->Child(), connection_tab, how_many_connection_nums,rev);
+		int score = this->Connect(node->Child(), connection_tab, how_many_connection_nums, rev);
+		free(connection_tab);
+		return score;
 	}
 	else {
 		std::cout << "memory not granted" << std::endl;
@@ -143,6 +154,10 @@ int Isomorphate::Connect(Leaf* leaf, int* connection_tab, int how_many_conn_nums
 	int static best_score = 0;
 	int static current_score = 0;
 	int static recursion_lvl = 0;
+	if (recursion_lvl == 0) {
+		best_score = 0;
+		current_score = 0;
+	}
 	if (leaf == nullptr) {
 		if (current_score > best_score) { best_score = current_score; }
 		return 0;
@@ -151,6 +166,7 @@ int Isomorphate::Connect(Leaf* leaf, int* connection_tab, int how_many_conn_nums
 		for (int i = 0; i < how_many_conn_nums; i++) {
 			int tmp = connection_tab[i];
 			if (connection_tab[i] != 0) {
+				int current_score_state = current_score;
 				if (rev != true) {
 					current_score += this->isomorphic_array[leaf->Value()][connection_tab[i]];
 				}
@@ -160,6 +176,7 @@ int Isomorphate::Connect(Leaf* leaf, int* connection_tab, int how_many_conn_nums
 				connection_tab[i] = 0;
 				recursion_lvl++;
 				current_score += this->Connect(leaf->Brother(), connection_tab, how_many_conn_nums,rev);
+				current_score = current_score_state;
 				recursion_lvl--;
 				if (recursion_lvl == 0) {
 					current_score = 0;
@@ -170,26 +187,40 @@ int Isomorphate::Connect(Leaf* leaf, int* connection_tab, int how_many_conn_nums
 		if (recursion_lvl == 0) {
 			return best_score;
 		}
+		else
+			return 0;
 	}
 }
 
 
 
 int Isomorphate::GetFromArray(int y, int x){
-	return this->isomorphic_array[y-1][x-1];
+	return this->isomorphic_array[y][x];
 }
 
 
 
 void Isomorphate::PutToArray(int y, int x, int value){
-	this->isomorphic_array[y-1][x-1] = value;
+	this->isomorphic_array[y][x] = value;
+}
+
+
+
+void Isomorphate::PrintArray() {
+	for (int i = 1; i < this->y; i++) {
+		for (int j = 1; j < this->x; j++) {
+			std::cout << this->isomorphic_array[i][j];
+			std::cout << "   ";
+		}
+		std::cout << std::endl;
+	}
 }
 
 
 
 void Isomorphate::DestroyArray(){
 	for (int i = 0; i < this->y; i++) {
-		free(this->isomorphic_array[y]);
+		free(this->isomorphic_array[i]);
 	}
 	free(this->isomorphic_array);
 }

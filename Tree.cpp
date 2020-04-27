@@ -150,6 +150,7 @@ void Tree::Tag(FIFO* queue) {
 		}
 		this->Tag(queue);
 	}
+	count = A;
 }
 
 

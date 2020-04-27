@@ -18,6 +18,7 @@ int main() {
 			Isomorphate* max_aggrement = new Isomorphate(Tree_array[i],Tree_array[j]);
 			score=max_aggrement->GetFromArray(A, A);
 			printf("%d\n", NUM_OF_LEAFS-score);
+			//max_aggrement->PrintArray();
 			delete max_aggrement;
 			max_aggrement = nullptr;
 		}
